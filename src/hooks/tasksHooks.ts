@@ -1,3 +1,4 @@
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import type { CreateTaskInput, Task, UpdateTaskInput } from 'src/types/task';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,55 +10,63 @@ export const taskKeys = {
   detail: (id: string) => ['tasks', id] as const,
 };
 
-export function useTasks() {
-  return useQuery({
+type UpdateTaskVariables = {
+  id: string;
+  patch: UpdateTaskInput;
+};
+
+export function useTasks(): UseQueryResult<Task[], Error> {
+  return useQuery<Task[], Error>({
     queryKey: taskKeys.all,
     queryFn: tasksApi.list,
   });
 }
 
-export function useTask(id: string) {
-  return useQuery({
+export function useTask(id: string): UseQueryResult<Task, Error> {
+  return useQuery<Task, Error>({
     queryKey: taskKeys.detail(id),
     queryFn: () => tasksApi.get(id),
     enabled: Boolean(id),
   });
 }
 
-export function useCreateTask() {
+export function useCreateTask(): UseMutationResult<Task, Error, CreateTaskInput> {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<Task, Error, CreateTaskInput>({
     mutationFn: (input: CreateTaskInput) => tasksApi.create(input),
-    onSuccess: (createdTask) => {
-      queryClient.setQueryData<Task[]>(taskKeys.all, (current = []) => [createdTask, ...current]);
-      queryClient.setQueryData(taskKeys.detail(createdTask.id), createdTask);
+    onSuccess: (createdTask: Task) => {
+      queryClient.setQueryData<Task[]>(taskKeys.all, (current: Task[] | undefined) => [
+        createdTask,
+        ...(current ?? []),
+      ]);
+      queryClient.setQueryData<Task>(taskKeys.detail(createdTask.id), createdTask);
     },
   });
 }
 
-export function useUpdateTask() {
+export function useUpdateTask(): UseMutationResult<Task, Error, UpdateTaskVariables> {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: UpdateTaskInput }) => tasksApi.update(id, patch),
-    onSuccess: (updatedTask) => {
-      queryClient.setQueryData<Task[]>(taskKeys.all, (current = []) =>
-        current.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+  return useMutation<Task, Error, UpdateTaskVariables>({
+    mutationFn: ({ id, patch }: UpdateTaskVariables) => tasksApi.update(id, patch),
+    onSuccess: (updatedTask: Task) => {
+      queryClient.setQueryData<Task[]>(taskKeys.all, (current: Task[] | undefined) =>
+        (current ?? []).map((task: Task) => (task.id === updatedTask.id ? updatedTask : task))
       );
-      queryClient.setQueryData(taskKeys.detail(updatedTask.id), updatedTask);
+      queryClient.setQueryData<Task>(taskKeys.detail(updatedTask.id), updatedTask);
     },
   });
 }
 
-export function useDeleteTask() {
+export function useDeleteTask(): UseMutationResult<{ ok: true }, Error, string> {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<{ ok: true }, Error, string>({
     mutationFn: (id: string) => tasksApi.delete(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<Task[]>(taskKeys.all, (current = []) =>
-        current.filter((task) => task.id !== id)
+    onSuccess: (_result: { ok: true }, id: string) => {
+      queryClient.setQueryData<Task[]>(taskKeys.all, (current: Task[] | undefined) =>
+        (current ?? []).filter((task: Task) => task.id !== id)
       );
       queryClient.removeQueries({ queryKey: taskKeys.detail(id) });
     },

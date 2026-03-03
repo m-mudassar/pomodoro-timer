@@ -1,4 +1,4 @@
-import type { TaskStatus } from 'src/types/task';
+import type { Task, TaskStatus } from 'src/types/task';
 
 import { useMemo, useState } from 'react';
 
@@ -16,17 +16,18 @@ export function TaskManagementPage() {
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
   const tasksQuery = useTasks();
 
-  const filteredTasks = useMemo(() => {
-    const tasks = tasksQuery.data ?? [];
+  const filteredTasks = useMemo<Task[]>(() => {
+    const tasks: Task[] = tasksQuery.data ?? [];
 
     if (statusFilter === 'all') {
       return tasks;
     }
 
-    return tasks.filter((task) => task.status === statusFilter);
+    return tasks.filter((task: Task) => task.status === statusFilter);
   }, [statusFilter, tasksQuery.data]);
 
-  const selectedTask = filteredTasks.find((task) => task.id === selectedTaskId) ?? filteredTasks[0] ?? null;
+  const selectedTask =
+    filteredTasks.find((task: Task) => task.id === selectedTaskId) ?? filteredTasks[0] ?? null;
 
   return (
     <Stack spacing={2} p={3}>
