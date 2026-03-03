@@ -1,7 +1,7 @@
 import type { Breakpoint } from '@mui/material/styles';
 import type { AuthSplitSectionProps } from './section';
 import type { AuthSplitContentProps } from './content';
-import type { MainSectionProps, LayoutSectionProps, HeaderSectionProps } from '../core';
+import type { MainSectionProps, HeaderSectionProps, LayoutSectionProps } from '../core';
 
 import { merge } from 'es-toolkit';
 

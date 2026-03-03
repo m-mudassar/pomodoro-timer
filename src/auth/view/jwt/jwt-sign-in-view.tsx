@@ -31,8 +31,8 @@ export const SignInSchema = z.object({
   email: schemaUtils.email(),
   password: z
     .string()
-    .min(1, { message: 'Password is required!' })
-    .min(6, { message: 'Password must be at least 6 characters!' }),
+    .min(1, { error: 'Password is required!' })
+    .min(6, { error: 'Password must be at least 6 characters!' }),
 });
 
 // ----------------------------------------------------------------------

@@ -29,13 +29,13 @@ import { SignUpTerms } from '../../components/sign-up-terms';
 export type SignUpSchemaType = z.infer<typeof SignUpSchema>;
 
 export const SignUpSchema = z.object({
-  firstName: z.string().min(1, { message: 'First name is required!' }),
-  lastName: z.string().min(1, { message: 'Last name is required!' }),
+  firstName: z.string().min(1, { error: 'First name is required!' }),
+  lastName: z.string().min(1, { error: 'Last name is required!' }),
   email: schemaUtils.email(),
   password: z
     .string()
-    .min(1, { message: 'Password is required!' })
-    .min(6, { message: 'Password must be at least 6 characters!' }),
+    .min(1, { error: 'Password is required!' })
+    .min(6, { error: 'Password must be at least 6 characters!' }),
 });
 
 // ----------------------------------------------------------------------
