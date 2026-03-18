@@ -1,54 +1,41 @@
-## Prerequisites
+## Pomodoro Task Management System
 
-- Node.js >=22 (Recommended)
+A React + TypeScript (Vite) task manager with a Pomodoro timer per task.
 
-## Installation
-
-**Using Yarn (Recommended)**
+### Run
 
 ```sh
-yarn install
-yarn dev
-```
-
-**Using Npm**
-
-```sh
-npm i
+npm install
 npm run dev
 ```
 
-## Build
+### Build
 
 ```sh
-yarn build
-# or
 npm run build
 ```
 
-## Mock server
+## Architecture
 
-By default we provide demo data from : `https://api-dev-minimal-[version].vercel.app`
+- UI is built from feature modules under `src/features/tasks` and `src/features/pomodoro`.
+- Data reads/writes are done through TanStack React Query hooks in `src/hooks/tasksHooks.ts`.
+- The UI never reads/writes `localStorage` directly.
+- Storage is abstracted in `src/api/tasksApi.ts` with async endpoint-like methods:
+  - `tasksApi.list()`
+  - `tasksApi.get(id)`
+  - `tasksApi.create(input)`
+  - `tasksApi.update(id, patch)`
+  - `tasksApi.delete(id)`
 
-To set up your local server:
+## Swapping LocalStorage for a real backend
 
-- **Guide:** [https://docs.minimals.cc/mock-server](https://docs.minimals.cc/mock-server).
+Only replace the internals of `src/api/tasksApi.ts`.
 
-- **Resource:** [Download](https://www.dropbox.com/scl/fo/bopqsyaatc8fbquswxwww/AKgu6V6ZGmxtu22MuzsL5L4?rlkey=8s55vnilwz2d8nsrcmdo2a6ci&dl=0).
+As long as these method signatures and return types remain the same, no UI or hook changes are needed because all components consume data through `useTasks`, `useTask`, `useCreateTask`, `useUpdateTask`, and `useDeleteTask`.
 
-## Full version
+Typical migration path:
 
-- Create React App ([migrate to CRA](https://docs.minimals.cc/migrate-to-cra/)).
-- Next.js
-- Vite.js
-
-## Starter version
-
-- To remove unnecessary components. This is a simplified version ([https://starter.minimals.cc/](https://starter.minimals.cc/))
-- Good to start a new project. You can copy components from the full version.
-- Make sure to install the dependencies exactly as compared to the full version.
-
----
-
-**NOTE:**
-_When copying folders remember to also copy hidden files like .env. This is important because .env files often contain environment variables that are crucial for the application to run correctly._
+1. Keep exported function signatures unchanged.
+2. Replace localStorage read/write with `fetch('/api/tasks')` (or your API client).
+3. Preserve returned `Task` shape and error semantics.
+4. Keep React Query hooks untouched.
